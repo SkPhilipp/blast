@@ -113,6 +113,18 @@ class ExpressionType(enum.Enum):
         return mapping[self]
 
 
+class ExpressionVariable(object):
+    def __init__(self, name: str, length: int):
+        self._name: str = name
+        self._length: int = length
+
+    def __len__(self):
+        return self._length
+
+    def __str__(self):
+        return self._name
+
+
 class Expression(object):
     """
     Expression overloads Python operators allowing for easy construction of expressions on any type of input.
@@ -227,6 +239,11 @@ class Expression(object):
 
 if __name__ == "__main__":
     exp1 = Expression.of([0, 0, 0, 0])
+    exp2 = Expression(ExpressionType.INVERT, [[1, 1, 0, 0]])
+    exp3 = Expression(ExpressionType.EQUALS, [exp1, exp2])
+    print(exp3[-2:2][2:4])
+
+    exp1 = Expression.of(ExpressionVariable("variable1", 4))
     exp2 = Expression(ExpressionType.INVERT, [[1, 1, 0, 0]])
     exp3 = Expression(ExpressionType.EQUALS, [exp1, exp2])
     print(exp3[-2:2][2:4])
