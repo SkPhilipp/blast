@@ -11,6 +11,7 @@ set -o pipefail
 command=$1
 
 if [[ $command == "build" ]]; then
+    poetry run pytest
     poetry install --sync
     poetry build --format wheel
     version=$(poetry version --short)
