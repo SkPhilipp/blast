@@ -235,21 +235,3 @@ class Expression(object):
 
     def _to_string(self):
         return f"{self._type}({', '.join([str(bit_input) for bit_input in self._inputs])})"
-
-
-if __name__ == "__main__":
-    exp1 = Expression.of([0, 0, 0, 0])
-    exp2 = Expression(ExpressionType.INVERT, [[1, 1, 0, 0]])
-    exp3 = Expression(ExpressionType.EQUALS, [exp1, exp2])
-    print(exp3[-2:2][2:4])
-    print(len(exp1))
-    print(len(exp2))
-    print(len(exp3))
-
-    exp1 = Expression.of(ExpressionVariable("variable1", 4))
-    exp2 = Expression(ExpressionType.INVERT, [[1, 1, 0, 0]])
-    exp3 = Expression(ExpressionType.EQUALS, [exp1, exp2])
-    print(exp3[-2:2][2:4])
-    print(len(exp1))
-    print(len(exp2))
-    print(len(exp3))
