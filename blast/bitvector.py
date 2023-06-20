@@ -1,6 +1,6 @@
 import sys
 
-from blast.bit import SymbolicBit, SymbolicBitDynamic, BIT_1, BIT_0
+from blast.bit import Bit, BitMutable, BIT_1, BIT_0
 
 
 def bit_len(byte_len):
@@ -8,14 +8,14 @@ def bit_len(byte_len):
 
 
 # noinspection PyProtectedMember
-class SymbolicBitvector(object):
+class BitVector(object):
     """
     A symbolic bitvector is a vector of symbolic bits; a utility for symbolic bit bulk operations.
     """
 
     def __init__(self, bits):
         """
-        :param SymbolicBit[] bits: list of symbolic bits to represent the vector
+        :param Bit[] bits: list of symbolic bits to represent the vector
         """
         self._bits = bits
         self._last_call_id_complexity = None
@@ -28,14 +28,14 @@ class SymbolicBitvector(object):
         Creates a symbolic bit vector containing dynamic symbolic bits.
 
         :param int length: Length of bit-vector, in bits
-        :rtype: SymbolicBitvector
+        :rtype: BitVector
         """
-        bits = [SymbolicBitDynamic() for _ in range(length)]
-        return SymbolicBitvector(bits)
+        bits = [BitMutable() for _ in range(length)]
+        return BitVector(bits)
 
     @staticmethod
     def from_int(value, length):
-        bv = SymbolicBitvector.dynamic(length)
+        bv = BitVector.dynamic(length)
         bv[0:length] = value
         return bv
 
@@ -58,10 +58,10 @@ class SymbolicBitvector(object):
         Returns an independently modifiable view on the symbolic bit vector for the given item.
 
         :param item: An integer or a slice, interpreted as bit indices
-        :rtype: SymbolicBitvector
+        :rtype: BitVector
         """
         valid_slice = self._valid_slice(item)
-        return SymbolicBitvector(self._bits[valid_slice])
+        return BitVector(self._bits[valid_slice])
 
     def _write_symbolic(self, bit_start_inclusive, bits, value):
         """
@@ -69,7 +69,7 @@ class SymbolicBitvector(object):
 
         :param int bit_start_inclusive: Start index of bit-vector, in bits
         :param int bits: Amount of bits of value to write
-        :param SymbolicBitvector value: Value to assign to bit-vector
+        :param BitVector value: Value to assign to bit-vector
         """
         for i in range(bit_start_inclusive, bit_start_inclusive + bits):
             self._bits[i] = value._bits[i - bit_start_inclusive]
@@ -96,7 +96,7 @@ class SymbolicBitvector(object):
         """
         valid_slice = self._valid_slice(item)
         bits = valid_slice.stop - valid_slice.start if type(valid_slice) is slice else 1
-        if type(value) == SymbolicBitvector:
+        if type(value) == BitVector:
             self._write_symbolic(valid_slice.start, bits, value)
         if type(value) == int:
             self._write_concrete(valid_slice.start, bits, value)
@@ -114,21 +114,6 @@ class SymbolicBitvector(object):
             if not bit.is_concrete():
                 return False
         return True
-
-    def simplify(self):
-        """
-        Simplifies the symbolic bit vector in-place.
-        """
-        for i in range(len(self._bits)):
-            self._bits[i] = self._bits[i].simplify()
-        return self
-
-    def complexity(self):
-        """
-        Returns the sum of the complexity of all symbolic bits in this bit vector.
-        :return:
-        """
-        return sum(bit.complexity() for bit in self._bits)
 
     def __int__(self):
         """
@@ -263,11 +248,11 @@ class SymbolicBitvector(object):
         if len(self._bits) != len(other._bits):
             raise ValueError("Bit vectors must have the same length")
         if self.is_concrete() and other.is_concrete():
-            return SymbolicBitvector.from_int(int(self) + int(other), len(self))
+            return BitVector.from_int(int(self) + int(other), len(self))
         bv = self[:]
         carry = BIT_0
         for i in range(len(bv._bits)):
-            bv._bits[i], carry = SymbolicBit.add(bv._bits[i], other._bits[i], carry)
+            bv._bits[i], carry = Bit.add(bv._bits[i], other._bits[i], carry)
         return bv
 
     def __sub__(self, other):
@@ -284,12 +269,12 @@ class SymbolicBitvector(object):
         result = int(self) + int(other)
         if result < 0:
             result += 2 ** len(self)
-        return SymbolicBitvector.from_int(result, len(self))
+        return BitVector.from_int(result, len(self))
 
 
 if __name__ == "__main__":
     # initial properties
-    bitvector = SymbolicBitvector.dynamic(bit_len(8))
+    bitvector = BitVector.dynamic(bit_len(8))
     assert len(bitvector) == bit_len(8)
     assert not bitvector.is_concrete(bit_len(0), bit_len(8))
 
@@ -310,13 +295,13 @@ if __name__ == "__main__":
     assert int(bitvector_view[bit_len(0):bit_len(3)]) == 0xff0110
 
     # operators and simplification
-    bitvector_0xf0f0f0 = SymbolicBitvector.from_int(0xf0f0f0, bit_len(3))
-    bitvector_0x0f0f0f = SymbolicBitvector.from_int(0x0f0f0f, bit_len(3))
-    assert int((~bitvector_0xf0f0f0).simplify()) == 0x0f0f0f
-    assert int((~bitvector_0x0f0f0f).simplify()) == 0xf0f0f0
-    assert int((bitvector_0xf0f0f0 ^ bitvector_0x0f0f0f).simplify()) == 0xffffff
-    assert int((bitvector_0xf0f0f0 | bitvector_0x0f0f0f).simplify()) == 0xffffff
-    assert int((bitvector_0xf0f0f0 & bitvector_0x0f0f0f).simplify()) == 0x000000
+    bitvector_0xf0f0f0 = BitVector.from_int(0xf0f0f0, bit_len(3))
+    bitvector_0x0f0f0f = BitVector.from_int(0x0f0f0f, bit_len(3))
+    assert int((~bitvector_0xf0f0f0)) == 0x0f0f0f
+    assert int((~bitvector_0x0f0f0f)) == 0xf0f0f0
+    assert int((bitvector_0xf0f0f0 ^ bitvector_0x0f0f0f)) == 0xffffff
+    assert int((bitvector_0xf0f0f0 | bitvector_0x0f0f0f)) == 0xffffff
+    assert int((bitvector_0xf0f0f0 & bitvector_0x0f0f0f)) == 0x000000
 
     # rotates
     assert int((bitvector_0xf0f0f0.rotate_right(0))) == 0xf0f0f0
@@ -331,7 +316,7 @@ if __name__ == "__main__":
     assert int((bitvector_0xf0f0f0.rotate_left(4))) == 0x0f0f0f
 
     # shifts
-    bitvector_0xffffff = SymbolicBitvector.from_int(0xffffff, bit_len(3))
+    bitvector_0xffffff = BitVector.from_int(0xffffff, bit_len(3))
     assert int((bitvector_0xffffff << 0)) == 0xffffff
     assert int((bitvector_0xffffff << 1)) == 0xfffffe
     assert int((bitvector_0xffffff << 2)) == 0xfffffc
