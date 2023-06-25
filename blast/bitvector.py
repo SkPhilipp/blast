@@ -41,6 +41,14 @@ class BitVector(object):
         bv[0:length] = value
         return bv
 
+    def bit(self, index: int) -> Bit:
+        """
+        Returns the bit at the given index.
+        :param index:
+        :return:
+        """
+        return self._bits[index]
+
     def _valid_slice(self, item: slice | int) -> slice:
         """
         Returns a slice with start and stop indices within this bit vector's range.
@@ -63,6 +71,18 @@ class BitVector(object):
         """
         valid_slice = self._valid_slice(item)
         return BitVector(self._bits[valid_slice])
+
+    def _write_bit(self, start_inclusive: int, length: int, value: Bit):
+        """
+        Copy a bit into this bit-vector.
+        :param start_inclusive: Start index within this bit-vector, in bits
+        :param length: Amount of bits to copy
+        :param value: A bit to copy into this bit-vector.
+        :return:
+        """
+        if length != 1:
+            raise ValueError("Cannot assign a single bit to multiple bits")
+        self._bits[start_inclusive] = value
 
     def _write_bitvector(self, start_inclusive: int, length: int, source: Self):
         """
@@ -101,6 +121,8 @@ class BitVector(object):
             self._write_bitvector(valid_slice.start, bits, value)
         elif type(value) == int:
             self._write_int(valid_slice.start, bits, value)
+        elif isinstance(value, Bit):
+            self._write_bit(valid_slice.start, bits, value)
         else:
             raise TypeError("Invalid type for value: {}".format(type(value)))
 

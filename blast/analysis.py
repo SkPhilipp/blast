@@ -1,17 +1,23 @@
-from blast.bit import BitMutable
+from blast.bit import Reference, Bit, BitMutable
 from blast.bitvector import BitVector
 
 
 class BitVectorAnalysis(object):
     def __init__(self, bit_vector: BitVector):
-        self.bit_vector = bit_vector
+        self.bit_vector: BitVector = bit_vector
 
-    def inputs(self) -> set[BitMutable]:
+    def inputs(self) -> set[Reference]:
         """
         Return the distinct input bits of the underlying bit vector.
         :return:
         """
-        pass
+        inputs = set()
+        for i in range(len(self.bit_vector)):
+            bit = self.bit_vector.bit(i)
+            for reference in bit.inputs():
+                if isinstance(reference.value, BitMutable):
+                    inputs.add(reference)
+        return inputs
 
     def inputs_size(self) -> int:
         """
@@ -20,7 +26,7 @@ class BitVectorAnalysis(object):
         """
         return 2 ** len(self.inputs())
 
-    def outputs(self) -> set[Bit]:
+    def outputs(self) -> set[Reference]:
         """
         Return the distinct elements of the underlying bit vector.
         :return:
@@ -34,7 +40,7 @@ class BitVectorAnalysis(object):
         """
         return 2 ** len(self.outputs())
 
-    def constraints(self) -> set[Bit]:
+    def constraints(self) -> set[Reference]:
         """
         Return the constraints applied to computations.
         :return:

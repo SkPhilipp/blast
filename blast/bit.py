@@ -12,6 +12,12 @@ class Reference(object):
     def __hash__(self):
         return id(self.value)
 
+    def __str__(self):
+        return repr(self)
+
+    def __repr__(self):
+        return f"Reference(@{id(self.value)})"
+
 
 class Bit(object):
     """
@@ -19,19 +25,19 @@ class Bit(object):
     This class overloads operators on which some data structures rely and as such should be wrapped by a Reference in order to be used in dicts and sets.
     """
 
-    def is_concrete(self):
+    def is_concrete(self) -> bool:
         """
         Returns true if the read result of the transform is expected to be concrete.
         """
         raise NotImplementedError()
 
-    def inputs(self):
+    def inputs(self) -> set[Reference]:
         """
         Returns a set of Bit dependencies which must be assigned a value before this Bit can be resolved.
         """
         raise NotImplementedError()
 
-    def __int__(self):
+    def __int__(self) -> int:
         """
         Applies the transform on any concrete local inputs and returns a value.
 
@@ -39,43 +45,43 @@ class Bit(object):
         """
         raise NotImplementedError()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return repr(self)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         raise NotImplementedError()
 
-    def __invert__(self):
+    def __invert__(self) -> 'Bit':
         return BitOperator(BitOperator.MAPPING_1_NOT, self)
 
-    def __xor__(self, other):
+    def __xor__(self, other) -> 'Bit':
         return BitOperator(BitOperator.MAPPING_2_XOR, self, other)
 
-    def __and__(self, other):
+    def __and__(self, other) -> 'Bit':
         return BitOperator(BitOperator.MAPPING_2_AND, self, other)
 
-    def __or__(self, other):
+    def __or__(self, other) -> 'Bit':
         return BitOperator(BitOperator.MAPPING_2_OR, self, other)
 
-    def __add__(self, other):
+    def __add__(self, other) -> 'Bit':
         return BitOperator(BitOperator.MAPPING_2_ADD, self, other)
 
-    def __lt__(self, other):
+    def __lt__(self, other) -> 'Bit':
         return BitOperator(BitOperator.MAPPING_2_LESS_THAN, self, other)
 
-    def __gt__(self, other):
+    def __gt__(self, other) -> 'Bit':
         return BitOperator(BitOperator.MAPPING_2_GREATER_THAN, self, other)
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> 'Bit':
         return BitOperator(BitOperator.MAPPING_2_EQUALS, self, other)
 
     @staticmethod
-    def add(a, b, carry):
+    def add(a: 'Bit', b: 'Bit', carry: 'Bit') -> ('Bit', 'Bit'):
         """
         Adds two bits and a carry bit, returning their sum and the carry bit of the sum.
-        :param a:Bit
-        :param b:Bit
-        :param carry:Bit
+        :param a
+        :param b
+        :param carry
         :return:
         """
         total = BitOperator(BitOperator.MAPPING_3_ADD, a, b, carry)
@@ -118,16 +124,15 @@ class BitMutable(Bit):
     An implementation of a symbolic bit which is mutable and may be assigned a value.
     """
 
-    def __init__(self, value=None):
+    def __init__(self, value: int | None = None):
         self._value = None
         """
         Concrete value of this Bit, if any.
-
         :type: int|None
         """
         self.assign(value)
 
-    def assign(self, value):
+    def assign(self, value: int | None):
         if value not in (0, 1, None):
             raise ValueError("Value must be 0, 1 or None.")
         self._value = value
