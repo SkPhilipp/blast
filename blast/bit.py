@@ -81,6 +81,9 @@ class Bit(object):
     def __eq__(self, other) -> 'Bit':
         return BitExpression(BitExpression.MAPPING_2_EQUALS, self, other)
 
+    def __ne__(self, other) -> 'Bit':
+        return BitExpression(BitExpression.MAPPING_2_NOT_EQUALS, self, other)
+
     @staticmethod
     def add(a: 'Bit', b: 'Bit', carry: 'Bit') -> ('Bit', 'Bit'):
         """
@@ -206,7 +209,7 @@ BitExpression.MAPPING_2_CONSTANT_ZERO = [0, 0, 0, 0]
 BitExpression.MAPPING_2_AND = [0, 0, 0, 1]
 BitExpression.MAPPING_2_GREATER_THAN = [0, 1, 0, 0]
 BitExpression.MAPPING_2_LESS_THAN = [0, 0, 1, 0]
-BitExpression.MAPPING_2_XOR = BitExpression.MAPPING_2_ADD = [0, 1, 1, 0]
+BitExpression.MAPPING_2_XOR = BitExpression.MAPPING_2_ADD = BitExpression.MAPPING_2_NOT_EQUALS = [0, 1, 1, 0]
 BitExpression.MAPPING_2_OR = [0, 1, 1, 1]
 BitExpression.MAPPING_2_EQUALS_ZERO = [1, 0, 0, 0]
 BitExpression.MAPPING_2_EQUALS = [1, 0, 0, 1]

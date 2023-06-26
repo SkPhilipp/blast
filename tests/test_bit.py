@@ -89,6 +89,12 @@ def test_overloaded_operators():
     assert int(BIT_1 == BIT_0) == 0
     assert int(BIT_1 == BIT_1) == 1
 
+    # not equals
+    assert int(BIT_0 != BIT_0) == 0
+    assert int(BIT_0 != BIT_1) == 1
+    assert int(BIT_1 != BIT_0) == 1
+    assert int(BIT_1 != BIT_1) == 0
+
     # greater than or equals
     assert int(BIT_0 >= BIT_0) == 1
     assert int(BIT_0 >= BIT_1) == 0
