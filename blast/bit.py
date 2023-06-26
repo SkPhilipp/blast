@@ -69,8 +69,14 @@ class Bit(object):
     def __lt__(self, other) -> 'Bit':
         return BitExpression(BitExpression.MAPPING_2_LESS_THAN, self, other)
 
+    def __le__(self, other) -> 'Bit':
+        return BitExpression(BitExpression.MAPPING_2_LESS_THAN_OR_EQUALS, self, other)
+
     def __gt__(self, other) -> 'Bit':
         return BitExpression(BitExpression.MAPPING_2_GREATER_THAN, self, other)
+
+    def __ge__(self, other) -> 'Bit':
+        return BitExpression(BitExpression.MAPPING_2_GREATER_THAN_OR_EQUALS, self, other)
 
     def __eq__(self, other) -> 'Bit':
         return BitExpression(BitExpression.MAPPING_2_EQUALS, self, other)
@@ -198,14 +204,14 @@ BitExpression.MAPPING_1_NOT = [1, 0]
 BitExpression.MAPPING_1_CONSTANT_ZERO = [0, 0]
 BitExpression.MAPPING_2_CONSTANT_ZERO = [0, 0, 0, 0]
 BitExpression.MAPPING_2_AND = [0, 0, 0, 1]
-BitExpression.MAPPING_2_GREATER_THAN = [0, 0, 1, 0]
-BitExpression.MAPPING_2_LESS_THAN = [0, 1, 0, 0]
-BitExpression.MAPPING_2_XOR = [0, 1, 1, 0]
+BitExpression.MAPPING_2_GREATER_THAN = [0, 1, 0, 0]
+BitExpression.MAPPING_2_LESS_THAN = [0, 0, 1, 0]
+BitExpression.MAPPING_2_XOR = BitExpression.MAPPING_2_ADD = [0, 1, 1, 0]
 BitExpression.MAPPING_2_OR = [0, 1, 1, 1]
 BitExpression.MAPPING_2_EQUALS_ZERO = [1, 0, 0, 0]
 BitExpression.MAPPING_2_EQUALS = [1, 0, 0, 1]
-BitExpression.MAPPING_2_GREATER_THAN_OR_EQUALS = [1, 0, 1, 1]
-BitExpression.MAPPING_2_LESS_THAN_OR_EQUALS = [1, 1, 0, 1]
+BitExpression.MAPPING_2_LESS_THAN_OR_EQUALS = [1, 0, 1, 1]
+BitExpression.MAPPING_2_GREATER_THAN_OR_EQUALS = [1, 1, 0, 1]
 BitExpression.MAPPING_2_NAND = [1, 1, 1, 0]
 BitExpression.MAPPING_2_CONSTANT_ONE = [1, 1, 1, 1]
 BitExpression.MAPPING_3_ADD = [0, 1, 1, 0, 1, 0, 0, 1]

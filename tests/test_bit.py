@@ -46,3 +46,63 @@ def test_constants():
     assert (undetermined_1 | undetermined_2).inputs() == {Reference(undetermined_1), Reference(undetermined_2)}
 
     print("OK")
+
+
+def test_overloaded_operators():
+    # not
+    assert int(~BIT_0) == 1
+    assert int(~BIT_1) == 0
+
+    # and
+    assert int(BIT_0 & BIT_0) == 0
+    assert int(BIT_0 & BIT_1) == 0
+    assert int(BIT_1 & BIT_0) == 0
+    assert int(BIT_1 & BIT_1) == 1
+
+    # greater than
+    assert int(BIT_0 > BIT_0) == 0
+    assert int(BIT_0 > BIT_1) == 0
+    assert int(BIT_1 > BIT_0) == 1
+    assert int(BIT_1 > BIT_1) == 0
+
+    # less than
+    assert int(BIT_0 < BIT_0) == 0
+    assert int(BIT_0 < BIT_1) == 1
+    assert int(BIT_1 < BIT_0) == 0
+    assert int(BIT_1 < BIT_1) == 0
+
+    # xor
+    assert int(BIT_0 ^ BIT_0) == 0
+    assert int(BIT_0 ^ BIT_1) == 1
+    assert int(BIT_1 ^ BIT_0) == 1
+    assert int(BIT_1 ^ BIT_1) == 0
+
+    # or
+    assert int(BIT_0 | BIT_0) == 0
+    assert int(BIT_0 | BIT_1) == 1
+    assert int(BIT_1 | BIT_0) == 1
+    assert int(BIT_1 | BIT_1) == 1
+
+    # equals
+    assert int(BIT_0 == BIT_0) == 1
+    assert int(BIT_0 == BIT_1) == 0
+    assert int(BIT_1 == BIT_0) == 0
+    assert int(BIT_1 == BIT_1) == 1
+
+    # greater than or equals
+    assert int(BIT_0 >= BIT_0) == 1
+    assert int(BIT_0 >= BIT_1) == 0
+    assert int(BIT_1 >= BIT_0) == 1
+    assert int(BIT_1 >= BIT_1) == 1
+
+    # less than or equals
+    assert int(BIT_0 <= BIT_0) == 1
+    assert int(BIT_0 <= BIT_1) == 1
+    assert int(BIT_1 <= BIT_0) == 0
+    assert int(BIT_1 <= BIT_1) == 1
+
+    # addition
+    assert int(BIT_0 + BIT_0) == 0
+    assert int(BIT_0 + BIT_1) == 1
+    assert int(BIT_1 + BIT_0) == 1
+    assert int(BIT_1 + BIT_1) == 0
