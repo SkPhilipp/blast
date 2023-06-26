@@ -47,7 +47,7 @@ class Sha256(object):
         self.digest[7] = self.digest[7] + ss[7]
 
     @staticmethod
-    def _pad(message):
+    def pad(message):
         """
         Pads the given message to create 512 bits of data, according to the SHA-256 standard.
 
@@ -69,7 +69,7 @@ class Sha256(object):
         :param known_input: Any known characteristics of the input encoded as a symbolic bitvector with at least a known length.
         :rtype: BitVector[]
         """
-        data = self._pad(known_input)
+        data = self.pad(known_input)
         for i in range(0, len(data), 512):
             self._transform(data[i:i + 512])
         return self.digest

@@ -19,37 +19,37 @@ class BitVectorAnalysis(object):
                     inputs.add(reference)
         return inputs
 
-    def inputs_size(self) -> int:
+    def inputs_len(self) -> int:
         """
-        Return the size of the set of all possible input values.
-        For example; if the bitvector has 4 input bits, this will return 16 (2^4).
+        Return the size of the set of all inputs required to resolve the bitvector.
         :return:
         """
         inputs_len = len(self.inputs())
         if inputs_len == 0:
             return 0
-        return 2 ** inputs_len
+        return inputs_len
 
-    def inputs_size_individualized(self) -> int:
+    def inputs_len_individualized(self) -> [int]:
         """
-        Return the sum of size of the set of all possible input values for each element in the bitvector.
-        For example; if the bitvector has 4 elements operating on 1 input bit each, this will return 8 (2^1 + 2^1 + 2^1 + 2^1).
+        Return the size of the set of all inputs required to resolve each element in the bitvector.
         :return:
         """
-        inputs_size = 0
+        inputs_lens = []
         for i in range(len(self.bit_vector)):
             bit = self.bit_vector.bit(i)
             inputs_len = len(bit.inputs())
-            if inputs_len > 0:
-                inputs_size += 2 ** len(bit.inputs())
-        return inputs_size
+            inputs_lens += [inputs_len]
+        return inputs_lens
 
     def outputs(self) -> set[Reference]:
         """
         Return the distinct elements of the underlying bit vector.
         :return:
         """
-        pass
+        outputs = set()
+        for i in range(len(self.bit_vector)):
+            outputs.add(Reference(self.bit_vector.bit(i)))
+        return outputs
 
     def outputs_size(self) -> int:
         """

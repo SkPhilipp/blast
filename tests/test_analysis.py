@@ -9,9 +9,9 @@ def test_all():
     undetermined_2 = BitMutable()
     undetermined_3 = BitMutable()
     vector[0:1] = undetermined_1
-    vector[2:3] = undetermined_2
-    vector[3:4] = undetermined_3
+    vector[1:2] = undetermined_2
+    vector[2:3] = undetermined_3
     analysis = BitVectorAnalysis(vector)
     assert analysis.inputs() == {Reference(undetermined_1), Reference(undetermined_2), Reference(undetermined_3)}
-    assert analysis.inputs_size() == 2 ** len(analysis.inputs())
-    assert analysis.inputs_size_individualized() == 2 * len(analysis.inputs())
+    assert analysis.inputs_len() == len(analysis.inputs())
+    assert analysis.inputs_len_individualized() == [1, 1, 1, 0]
