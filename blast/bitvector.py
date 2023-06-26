@@ -10,7 +10,7 @@ def bit_len(byte_len):
 
 class BitVector(object):
     """
-    BitsOperator represents a vector of bits, where each element is either a concrete (BitMutable) or symbolic (BitOperator).
+    Represents a vector of bits, where each bit is either concrete (BitMutable) or symbolic (BitExpression).
     """
 
     def __init__(self, bits: [Bit]):

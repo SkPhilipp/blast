@@ -52,28 +52,28 @@ class Bit(object):
         raise NotImplementedError()
 
     def __invert__(self) -> 'Bit':
-        return BitOperator(BitOperator.MAPPING_1_NOT, self)
+        return BitExpression(BitExpression.MAPPING_1_NOT, self)
 
     def __xor__(self, other) -> 'Bit':
-        return BitOperator(BitOperator.MAPPING_2_XOR, self, other)
+        return BitExpression(BitExpression.MAPPING_2_XOR, self, other)
 
     def __and__(self, other) -> 'Bit':
-        return BitOperator(BitOperator.MAPPING_2_AND, self, other)
+        return BitExpression(BitExpression.MAPPING_2_AND, self, other)
 
     def __or__(self, other) -> 'Bit':
-        return BitOperator(BitOperator.MAPPING_2_OR, self, other)
+        return BitExpression(BitExpression.MAPPING_2_OR, self, other)
 
     def __add__(self, other) -> 'Bit':
-        return BitOperator(BitOperator.MAPPING_2_ADD, self, other)
+        return BitExpression(BitExpression.MAPPING_2_ADD, self, other)
 
     def __lt__(self, other) -> 'Bit':
-        return BitOperator(BitOperator.MAPPING_2_LESS_THAN, self, other)
+        return BitExpression(BitExpression.MAPPING_2_LESS_THAN, self, other)
 
     def __gt__(self, other) -> 'Bit':
-        return BitOperator(BitOperator.MAPPING_2_GREATER_THAN, self, other)
+        return BitExpression(BitExpression.MAPPING_2_GREATER_THAN, self, other)
 
     def __eq__(self, other) -> 'Bit':
-        return BitOperator(BitOperator.MAPPING_2_EQUALS, self, other)
+        return BitExpression(BitExpression.MAPPING_2_EQUALS, self, other)
 
     @staticmethod
     def add(a: 'Bit', b: 'Bit', carry: 'Bit') -> ('Bit', 'Bit'):
@@ -84,8 +84,8 @@ class Bit(object):
         :param carry
         :return:
         """
-        total = BitOperator(BitOperator.MAPPING_3_ADD, a, b, carry)
-        carry = BitOperator(BitOperator.MAPPING_3_ADD_CARRY, a, b, carry)
+        total = BitExpression(BitExpression.MAPPING_3_ADD, a, b, carry)
+        carry = BitExpression(BitExpression.MAPPING_3_ADD_CARRY, a, b, carry)
         return total, carry
 
 
@@ -153,21 +153,19 @@ class BitMutable(Bit):
             return str(self._value)
 
 
-class BitOperator(Bit):
+class BitExpression(Bit):
     """
-    An implementation of a symbolic bit expression using a list of known outputs. For example;
-    - 1-bit NOT as a BitOperator would be represented by outputs [1, 0]. (for inputs 0b0, 0b1 respectively)
-    - 2-bit AND as a BitOperator would be represented by outputs [0, 0, 0, 1]. (for inputs 0b00, 0b01, 0b10, 0b11 respectively)
+    An implementation of a symbolic bit mapping its inputs through a list of outputs. For example;
+    - 1-bit NOT as a BitExpression would be represented by outputs [1, 0]. (for inputs 0b0, 0b1 respectively)
+    - 2-bit AND as a BitExpression would be represented by outputs [0, 0, 0, 1]. (for inputs 0b00, 0b01, 0b10, 0b11 respectively)
     """
 
     def __init__(self, outputs: [int], *dependencies: Bit):
-        self.dependencies = dependencies
-        self.outputs = outputs
+        self.outputs: [int] = outputs
         """
-        List of outputs for this operator.
-
-        :type: [int]
+        List of outputs for this.
         """
+        self.dependencies: [Bit] = dependencies
 
     def inputs(self):
         inputs = set()
@@ -196,19 +194,19 @@ class BitOperator(Bit):
         return "({})".format(f" {output_int} ".join(repr(dependency) for dependency in self.dependencies))
 
 
-BitOperator.MAPPING_1_NOT = [1, 0]
-BitOperator.MAPPING_1_CONSTANT_ZERO = [0, 0]
-BitOperator.MAPPING_2_CONSTANT_ZERO = [0, 0, 0, 0]
-BitOperator.MAPPING_2_AND = [0, 0, 0, 1]
-BitOperator.MAPPING_2_GREATER_THAN = [0, 0, 1, 0]
-BitOperator.MAPPING_2_LESS_THAN = [0, 1, 0, 0]
-BitOperator.MAPPING_2_XOR = [0, 1, 1, 0]
-BitOperator.MAPPING_2_OR = [0, 1, 1, 1]
-BitOperator.MAPPING_2_EQUALS_ZERO = [1, 0, 0, 0]
-BitOperator.MAPPING_2_EQUALS = [1, 0, 0, 1]
-BitOperator.MAPPING_2_GREATER_THAN_OR_EQUALS = [1, 0, 1, 1]
-BitOperator.MAPPING_2_LESS_THAN_OR_EQUALS = [1, 1, 0, 1]
-BitOperator.MAPPING_2_NAND = [1, 1, 1, 0]
-BitOperator.MAPPING_2_CONSTANT_ONE = [1, 1, 1, 1]
-BitOperator.MAPPING_3_ADD = [0, 1, 1, 0, 1, 0, 0, 1]
-BitOperator.MAPPING_3_ADD_CARRY = [0, 0, 0, 1, 0, 1, 1, 1]
+BitExpression.MAPPING_1_NOT = [1, 0]
+BitExpression.MAPPING_1_CONSTANT_ZERO = [0, 0]
+BitExpression.MAPPING_2_CONSTANT_ZERO = [0, 0, 0, 0]
+BitExpression.MAPPING_2_AND = [0, 0, 0, 1]
+BitExpression.MAPPING_2_GREATER_THAN = [0, 0, 1, 0]
+BitExpression.MAPPING_2_LESS_THAN = [0, 1, 0, 0]
+BitExpression.MAPPING_2_XOR = [0, 1, 1, 0]
+BitExpression.MAPPING_2_OR = [0, 1, 1, 1]
+BitExpression.MAPPING_2_EQUALS_ZERO = [1, 0, 0, 0]
+BitExpression.MAPPING_2_EQUALS = [1, 0, 0, 1]
+BitExpression.MAPPING_2_GREATER_THAN_OR_EQUALS = [1, 0, 1, 1]
+BitExpression.MAPPING_2_LESS_THAN_OR_EQUALS = [1, 1, 0, 1]
+BitExpression.MAPPING_2_NAND = [1, 1, 1, 0]
+BitExpression.MAPPING_2_CONSTANT_ONE = [1, 1, 1, 1]
+BitExpression.MAPPING_3_ADD = [0, 1, 1, 0, 1, 0, 0, 1]
+BitExpression.MAPPING_3_ADD_CARRY = [0, 0, 0, 1, 0, 1, 1, 1]
