@@ -9,6 +9,9 @@ class Reference(object):
     def __eq__(self, other):
         return isinstance(other, Reference) and id(self.value) == id(other.value)
 
+    def __lt__(self, other):
+        return isinstance(other, Reference) and id(self.value) < id(other.value)
+
     def __hash__(self):
         return id(self.value)
 

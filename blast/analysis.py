@@ -80,13 +80,26 @@ class BitVectorAnalysis(object):
         """
         pass
 
-    def compute(self, input_range: range) -> bytearray:
+    def compute(self, input_range: range | None = None) -> [int]:
         """
         Compute the output of the bitvector for the given input range.
         :param input_range:
         :return:
         """
-        pass
+        results = []
+        inputs = list(self.inputs())
+        inputs.sort()
+        if input_range is None:
+            input_range = range(2 ** len(inputs))
+        for i_computation in input_range:
+            for i_input in range(len(inputs)):
+                value = (i_computation >> i_input) & 1
+                inputs[i_input].value.assign(value)
+            result = int(self.bit_vector)
+            results.append(result)
+        for element in inputs:
+            element.value.assign(None)
+        return results
 
     def compute_individualized(self, input_range: range) -> bytearray:
         """
