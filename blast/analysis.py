@@ -8,38 +8,37 @@ class BitVectorAnalysis(object):
 
     def inputs(self) -> set[Reference]:
         """
-        Return the distinct input bits of the underlying bit vector.
+        Return the distinct non-concrete input bits required to resolve the bitvector.
         :return:
         """
         inputs = set()
         for i in range(len(self.bit_vector)):
             bit = self.bit_vector.bit(i)
             for reference in bit.inputs():
-                if isinstance(reference.value, BitMutable):
-                    inputs.add(reference)
+                if not isinstance(reference.value, BitMutable):
+                    continue
+                if reference.value.is_concrete():
+                    continue
+                inputs.add(reference)
         return inputs
 
-    def inputs_len(self) -> int:
+    def inputs_individualized(self) -> [set[Reference]]:
         """
-        Return the size of the set of all inputs required to resolve the bitvector.
+        Return the distinct non-concrete inputs bits required to resolve each individual bit of the bitvector.
         :return:
         """
-        inputs_len = len(self.inputs())
-        if inputs_len == 0:
-            return 0
-        return inputs_len
-
-    def inputs_len_individualized(self) -> [int]:
-        """
-        Return the size of the set of all inputs required to resolve each element in the bitvector.
-        :return:
-        """
-        inputs_lens = []
+        inputs_all = []
         for i in range(len(self.bit_vector)):
+            inputs = set()
             bit = self.bit_vector.bit(i)
-            inputs_len = len(bit.inputs())
-            inputs_lens += [inputs_len]
-        return inputs_lens
+            for reference in bit.inputs():
+                if not isinstance(reference.value, BitMutable):
+                    continue
+                if reference.value.is_concrete():
+                    continue
+                inputs.add(reference)
+            inputs_all.append(inputs)
+        return inputs_all
 
     def outputs(self) -> set[Reference]:
         """

@@ -13,5 +13,4 @@ def test_all():
     vector[2:3] = undetermined_3
     analysis = BitVectorAnalysis(vector)
     assert analysis.inputs() == {Reference(undetermined_1), Reference(undetermined_2), Reference(undetermined_3)}
-    assert analysis.inputs_len() == len(analysis.inputs())
-    assert analysis.inputs_len_individualized() == [1, 1, 1, 0]
+    assert analysis.inputs_individualized() == [{Reference(undetermined_1)}, {Reference(undetermined_2)}, {Reference(undetermined_3)}, set()]
