@@ -36,5 +36,3 @@ def test_all():
     assert int(digest_long[5]) == 0x64ff2167
     assert int(digest_long[6]) == 0xf6ecedd4
     assert int(digest_long[7]) == 0x19db06c1
-
-    print("OK")
