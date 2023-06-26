@@ -69,33 +69,9 @@ def round_small(a: BitVector,
 
 
 def round_big(h: list[BitVector], w: BitVector, offset: int):
-    #                        a,    b,    c,    d,    e,    f,    g,    h
-    #                        k,    k,    k,    u,    k,    k,    k,    u
     h[3], h[7] = round_small(h[0], h[1], h[2], h[3], h[4], h[5], h[6], h[7], 0 + offset, w)
-    #                        a,    b,    c,    d,    e,    f,    g,    h
-    #                        k,    k,    k,    u,    k,    k,    k,    u
     h[2], h[6] = round_small(h[7], h[0], h[1], h[2], h[3], h[4], h[5], h[6], 1 + offset, w)
-    #                        a,    b,    c,    d,    e,    f,    g,    h
-    #                        k,    k,    k,    u,    k,    k,    k,    u
     h[1], h[5] = round_small(h[6], h[7], h[0], h[1], h[2], h[3], h[4], h[5], 2 + offset, w)
-    #
-    # TODO: ipynb the following;
-    #
-    # to infer the previous h[0] value;
-    # r[0] =   d + t1
-    # r[1] =  t2 + t1
-    #    t2 = sigma0(a) + majority(a, b, c)  which is known
-    #    t1 = r[1] - t2                      which is known save for the first bit (?)
-    #    d  = r[0] - t1                      which is known save for the first bit, potentially second bit (?)
-    #
-    # the previous h[4] value cannot be inferred, as t1 includes both h and w as unknown parameters.
-    # we can infer only;
-    # t1_known = sigma1(e) + choose(e, f, g) + MAGIC_FRACTIONS_BITVECTOR_CUBE[i]  which is known
-    # t1 = t1_known + h + w                                                       which defines the relation between h and w;
-    # h_add_w = t1 - t1_known                                                     which is known save for the first bit (?)
-    # h = h_add_w - w                                                             which is known save for the first bit, potentially second bit (?)
-    #
-    # where "known save for the first bit" implies a constraint, but in the worst case there is no solution.
     h[0], h[4] = round_small(h[5], h[6], h[7], h[0], h[1], h[2], h[3], h[4], 3 + offset, w)
     h[3], h[7] = h[7], h[3]
     h[2], h[6] = h[6], h[2]
