@@ -6,6 +6,16 @@ class BitVectorAnalysis(object):
     def __init__(self, bit_vector: BitVector):
         self.bit_vector: BitVector = bit_vector
 
+    def individualize(self) -> ['BitVectorAnalysis']:
+        """
+        Create a BitVectorAnalysis for each bit in the underlying bitvector.
+        :return:
+        """
+        analyses = []
+        for i in range(len(self.bit_vector)):
+            analyses.append(BitVectorAnalysis(self.bit_vector[i:i + 1]))
+        return analyses
+
     def inputs(self) -> set[Reference]:
         """
         Return the distinct non-concrete input bits required to resolve the bitvector.
@@ -22,24 +32,6 @@ class BitVectorAnalysis(object):
                 inputs.add(reference)
         return inputs
 
-    def inputs_individualized(self) -> [set[Reference]]:
-        """
-        Return the distinct non-concrete inputs bits required to resolve each individual bit of the bitvector.
-        :return:
-        """
-        inputs_all = []
-        for i in range(len(self.bit_vector)):
-            inputs = set()
-            bit = self.bit_vector.bit(i)
-            for reference in bit.inputs():
-                if not isinstance(reference.value, BitMutable):
-                    continue
-                if reference.value.is_concrete():
-                    continue
-                inputs.add(reference)
-            inputs_all.append(inputs)
-        return inputs_all
-
     def outputs(self) -> set[Reference]:
         """
         Return the distinct elements of the underlying bit vector.
@@ -49,13 +41,6 @@ class BitVectorAnalysis(object):
         for i in range(len(self.bit_vector)):
             outputs.add(Reference(self.bit_vector.bit(i)))
         return outputs
-
-    def outputs_size(self) -> int:
-        """
-        Return the size of the set of all possible output values.
-        :return:
-        """
-        return 2 ** len(self.outputs())
 
     def constraints(self) -> set[Reference]:
         """
@@ -100,14 +85,6 @@ class BitVectorAnalysis(object):
         for element in inputs:
             element.value.assign(None)
         return results
-
-    def compute_individualized(self, input_range: range) -> bytearray:
-        """
-        Compute the output of the bitvector for the given input range, for each element in the bitvector separately.
-        :param input_range:
-        :return:
-        """
-        pass
 
     def compute_hash(self, input_range: range) -> bytearray:
         """
