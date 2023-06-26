@@ -15,7 +15,7 @@ def gamma1(x: BitVector):
     return x.rotate_right(17) ^ x.rotate_right(19) ^ (x >> 10)
 
 
-def word(position):
+def word(position: int):
     """
     :param position:
     :return: A slice representing a 32-bit word from a bitvector representing a word array.
