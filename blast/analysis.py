@@ -22,9 +22,27 @@ class BitVectorAnalysis(object):
     def inputs_size(self) -> int:
         """
         Return the size of the set of all possible input values.
+        For example; if the bitvector has 4 input bits, this will return 16 (2^4).
         :return:
         """
-        return 2 ** len(self.inputs())
+        inputs_len = len(self.inputs())
+        if inputs_len == 0:
+            return 0
+        return 2 ** inputs_len
+
+    def inputs_size_individualized(self) -> int:
+        """
+        Return the sum of size of the set of all possible input values for each element in the bitvector.
+        For example; if the bitvector has 4 elements operating on 1 input bit each, this will return 8 (2^1 + 2^1 + 2^1 + 2^1).
+        :return:
+        """
+        inputs_size = 0
+        for i in range(len(self.bit_vector)):
+            bit = self.bit_vector.bit(i)
+            inputs_len = len(bit.inputs())
+            if inputs_len > 0:
+                inputs_size += 2 ** len(bit.inputs())
+        return inputs_size
 
     def outputs(self) -> set[Reference]:
         """
