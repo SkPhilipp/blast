@@ -111,3 +111,6 @@ class BitVectorAnalysis(object):
         :return:
         """
         pass
+
+    def __str__(self):
+        return f"BitVectorAnalysis({self.bit_vector})"

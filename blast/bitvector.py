@@ -151,11 +151,7 @@ class BitVector(object):
         return value
 
     def __str__(self) -> str:
-        """
-        Converts the bit vector to a string of hexadecimal digits.
-        :return:
-        """
-        return hex(int(self))
+        return self.__repr__()
 
     def __repr__(self) -> str:
         return "[" + ", ".join(str(bit) for bit in self._bits) + "]"

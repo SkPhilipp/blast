@@ -7,6 +7,7 @@ from blast.analysis import BitVectorAnalysis
 def run():
     analysis_gamma0 = BitVectorAnalysis(gamma0(BitVector.mutable(SIZE_WORD)))
     analysis_gamma0_individualized = analysis_gamma0.individualize()
+    print(analysis_gamma0)
     print(analysis_gamma0.inputs())
     for i in range(len(analysis_gamma0_individualized)):
         item = analysis_gamma0_individualized[i]
