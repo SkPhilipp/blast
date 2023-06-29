@@ -11,9 +11,9 @@ set -o pipefail
 command=$1
 
 if [[ $command == "build" ]]; then
-    poetry run pytest
     poetry install --sync
     poetry build --format wheel
+    poetry run pytest
     version=$(poetry version --short)
     docker build --tag "blast:${version}" --file Dockerfile .
     exit 0
