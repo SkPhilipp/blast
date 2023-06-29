@@ -40,6 +40,12 @@ class Bit(object):
         """
         raise NotImplementedError()
 
+    def dependencies(self) -> set[Reference]:
+        """
+        Returns a set of immediate Bit dependencies which must resolve to a value before this Bit can be resolved.
+        """
+        raise NotImplementedError()
+
     def __int__(self) -> int:
         """
         Applies the transform on any concrete local inputs and returns a value.
@@ -55,37 +61,37 @@ class Bit(object):
         raise NotImplementedError()
 
     def __invert__(self) -> 'Bit':
-        return BitExpression(BitExpression.MAPPING_1_NOT, self)
+        return BitExpression(BitExpression.GATE_1_NOT, self)
 
     def __xor__(self, other) -> 'Bit':
-        return BitExpression(BitExpression.MAPPING_2_XOR, self, other)
+        return BitExpression(BitExpression.GATE_2_XOR, self, other)
 
     def __and__(self, other) -> 'Bit':
-        return BitExpression(BitExpression.MAPPING_2_AND, self, other)
+        return BitExpression(BitExpression.GATE_2_AND, self, other)
 
     def __or__(self, other) -> 'Bit':
-        return BitExpression(BitExpression.MAPPING_2_OR, self, other)
+        return BitExpression(BitExpression.GATE_2_OR, self, other)
 
     def __add__(self, other) -> 'Bit':
-        return BitExpression(BitExpression.MAPPING_2_ADD, self, other)
+        return BitExpression(BitExpression.GATE_2_ADD, self, other)
 
     def __lt__(self, other) -> 'Bit':
-        return BitExpression(BitExpression.MAPPING_2_LESS_THAN, self, other)
+        return BitExpression(BitExpression.GATE_2_LESS_THAN, self, other)
 
     def __le__(self, other) -> 'Bit':
-        return BitExpression(BitExpression.MAPPING_2_LESS_THAN_OR_EQUALS, self, other)
+        return BitExpression(BitExpression.GATE_2_LESS_THAN_OR_EQUALS, self, other)
 
     def __gt__(self, other) -> 'Bit':
-        return BitExpression(BitExpression.MAPPING_2_GREATER_THAN, self, other)
+        return BitExpression(BitExpression.GATE_2_GREATER_THAN, self, other)
 
     def __ge__(self, other) -> 'Bit':
-        return BitExpression(BitExpression.MAPPING_2_GREATER_THAN_OR_EQUALS, self, other)
+        return BitExpression(BitExpression.GATE_2_GREATER_THAN_OR_EQUALS, self, other)
 
     def __eq__(self, other) -> 'Bit':
-        return BitExpression(BitExpression.MAPPING_2_EQUALS, self, other)
+        return BitExpression(BitExpression.GATE_2_EQUALS, self, other)
 
     def __ne__(self, other) -> 'Bit':
-        return BitExpression(BitExpression.MAPPING_2_NOT_EQUALS, self, other)
+        return BitExpression(BitExpression.GATE_2_NOT_EQUALS, self, other)
 
     @staticmethod
     def add(a: 'Bit', b: 'Bit', carry: 'Bit') -> ('Bit', 'Bit'):
@@ -96,8 +102,8 @@ class Bit(object):
         :param carry
         :return:
         """
-        total = BitExpression(BitExpression.MAPPING_3_ADD, a, b, carry)
-        carry = BitExpression(BitExpression.MAPPING_3_ADD_CARRY, a, b, carry)
+        total = BitExpression(BitExpression.GATE_3_ADD, a, b, carry)
+        carry = BitExpression(BitExpression.GATE_3_ADD_CARRY, a, b, carry)
         return total, carry
 
 
@@ -118,6 +124,9 @@ class BitImmutable(Bit):
         return True
 
     def inputs(self):
+        return {}
+
+    def dependencies(self):
         return {}
 
     def __int__(self):
@@ -155,6 +164,9 @@ class BitMutable(Bit):
     def inputs(self):
         return {Reference(self)}
 
+    def dependencies(self):
+        return {}
+
     def __int__(self):
         return self._value
 
@@ -167,58 +179,61 @@ class BitMutable(Bit):
 
 class BitExpression(Bit):
     """
-    An implementation of a symbolic bit mapping its inputs through a list of outputs. For example;
-    - 1-bit NOT as a BitExpression would be represented by outputs [1, 0]. (for inputs 0b0, 0b1 respectively)
-    - 2-bit AND as a BitExpression would be represented by outputs [0, 0, 0, 1]. (for inputs 0b00, 0b01, 0b10, 0b11 respectively)
+    An implementation of a symbolic bit expression which maps its inputs through a gate encoded as a list of bits. For example;
+    - 1-bit NOT as a BitExpression would be represented by gate [1, 0]. (for inputs 0b0, 0b1 respectively)
+    - 2-bit AND as a BitExpression would be represented by gate [0, 0, 0, 1]. (for inputs 0b00, 0b01, 0b10, 0b11 respectively)
     """
 
-    def __init__(self, outputs: [int], *dependencies: Bit):
-        self.outputs: [int] = outputs
-        """
-        List of outputs for this.
-        """
-        self.dependencies: [Bit] = dependencies
+    def __init__(self, gate: [int], *dependencies: Bit):
+        self.gate: [int] = gate
+        self._dependencies: [Bit] = dependencies
 
     def inputs(self):
         inputs = set()
-        for dependency in self.dependencies:
+        for dependency in self._dependencies:
             inputs.update(dependency.inputs())
         return inputs
 
+    def dependencies(self):
+        dependencies = set()
+        for dependency in self._dependencies:
+            dependencies.add(Reference(dependency))
+        return dependencies
+
     def is_concrete(self):
-        for dependency in self.dependencies:
+        for dependency in self._dependencies:
             if not dependency.is_concrete():
                 return False
         return True
 
     def __int__(self):
         index = 0
-        for dependency in reversed(self.dependencies):
+        for dependency in reversed(self._dependencies):
             index <<= 1
             index |= int(dependency) & 1
-        return self.outputs[index]
+        return self.gate[index]
 
     def __repr__(self):
         output_int = 0
-        for output in self.outputs:
+        for output in self.gate:
             output_int <<= 1
             output_int |= output & 1
-        return "({})".format(f" {output_int} ".join(repr(dependency) for dependency in self.dependencies))
+        return "({})".format(f" {output_int} ".join(repr(dependency) for dependency in self._dependencies))
 
 
-BitExpression.MAPPING_1_NOT = [1, 0]
-BitExpression.MAPPING_1_CONSTANT_ZERO = [0, 0]
-BitExpression.MAPPING_2_CONSTANT_ZERO = [0, 0, 0, 0]
-BitExpression.MAPPING_2_AND = [0, 0, 0, 1]
-BitExpression.MAPPING_2_GREATER_THAN = [0, 1, 0, 0]
-BitExpression.MAPPING_2_LESS_THAN = [0, 0, 1, 0]
-BitExpression.MAPPING_2_XOR = BitExpression.MAPPING_2_ADD = BitExpression.MAPPING_2_NOT_EQUALS = [0, 1, 1, 0]
-BitExpression.MAPPING_2_OR = [0, 1, 1, 1]
-BitExpression.MAPPING_2_EQUALS_ZERO = [1, 0, 0, 0]
-BitExpression.MAPPING_2_EQUALS = [1, 0, 0, 1]
-BitExpression.MAPPING_2_LESS_THAN_OR_EQUALS = [1, 0, 1, 1]
-BitExpression.MAPPING_2_GREATER_THAN_OR_EQUALS = [1, 1, 0, 1]
-BitExpression.MAPPING_2_NAND = [1, 1, 1, 0]
-BitExpression.MAPPING_2_CONSTANT_ONE = [1, 1, 1, 1]
-BitExpression.MAPPING_3_ADD = [0, 1, 1, 0, 1, 0, 0, 1]
-BitExpression.MAPPING_3_ADD_CARRY = [0, 0, 0, 1, 0, 1, 1, 1]
+BitExpression.GATE_1_NOT = [1, 0]
+BitExpression.GATE_1_CONSTANT_ZERO = [0, 0]
+BitExpression.GATE_2_CONSTANT_ZERO = [0, 0, 0, 0]
+BitExpression.GATE_2_AND = [0, 0, 0, 1]
+BitExpression.GATE_2_GREATER_THAN = [0, 1, 0, 0]
+BitExpression.GATE_2_LESS_THAN = [0, 0, 1, 0]
+BitExpression.GATE_2_XOR = BitExpression.GATE_2_ADD = BitExpression.GATE_2_NOT_EQUALS = [0, 1, 1, 0]
+BitExpression.GATE_2_OR = [0, 1, 1, 1]
+BitExpression.GATE_2_EQUALS_ZERO = [1, 0, 0, 0]
+BitExpression.GATE_2_EQUALS = [1, 0, 0, 1]
+BitExpression.GATE_2_LESS_THAN_OR_EQUALS = [1, 0, 1, 1]
+BitExpression.GATE_2_GREATER_THAN_OR_EQUALS = [1, 1, 0, 1]
+BitExpression.GATE_2_NAND = [1, 1, 1, 0]
+BitExpression.GATE_2_CONSTANT_ONE = [1, 1, 1, 1]
+BitExpression.GATE_3_ADD = [0, 1, 1, 0, 1, 0, 0, 1]
+BitExpression.GATE_3_ADD_CARRY = [0, 0, 0, 1, 0, 1, 1, 1]
