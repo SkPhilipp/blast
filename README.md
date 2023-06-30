@@ -3,7 +3,7 @@
 Usage:
 
 ```bash
- blast dump_gamma0
+ blast dump gamma0 | blast dump gamma0
 ```
 
 ## Development
