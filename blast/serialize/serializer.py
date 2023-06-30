@@ -1,4 +1,3 @@
-import sys
 from ruamel.yaml import YAML
 from blast.bit import Bit, BitMutable, BitImmutable, BitExpression, Reference
 from blast.bitvector import BitVector
@@ -44,7 +43,8 @@ class BitVectorSerializer(object):
 
         return expressions_ordered, expressions_bitvector
 
-    def _encode_gate(self, gate: list[int]):
+    @staticmethod
+    def encode_gate(gate: list[int]):
         """
         Encodes a gate of ints representing bits i.e. [0, 1, 1, 0] as a single integer.
         :param gate:
@@ -52,12 +52,27 @@ class BitVectorSerializer(object):
         """
         value = 0
         for i in range(len(gate)):
-            value |= gate[i] << i
+            value <<= 1
+            value |= gate[i]
         return value
 
-    def serialize(self):
+    @staticmethod
+    def decode_gate(gate: int, input_bits: int):
         """
-        Returns a list of bits that can be used to reconstruct the bit vector.
+        Decodes a gate of given input bit length representing from its integer representation.
+        :param gate:
+        :param input_bits:
+        :return:
+        """
+        value = []
+        for i in range(input_bits ** 2):
+            value.append(gate & 1)
+            gate >>= 1
+        return list(reversed(value))
+
+    def serialize(self, stream):
+        """
+        Writes a YAML representation of the bit vector to the given stream.
         """
         bits = []
         expressions_ordered, top = self._expressions_ordered()
@@ -72,7 +87,7 @@ class BitVectorSerializer(object):
                 bits.append(bit_yaml)
                 continue
             if isinstance(bit, BitExpression):
-                bit_yaml['gate'] = self._encode_gate(bit.gate)
+                bit_yaml['gate'] = BitVectorSerializer.encode_gate(bit.gate)
                 bit_yaml['dependencies'] = bit_identified.dependencies
                 bits.append(bit_yaml)
                 continue
@@ -90,4 +105,5 @@ class BitVectorSerializer(object):
         }
         yaml = YAML()
         yaml.default_flow_style = None
-        yaml.dump(data, sys.stdout)
+        yaml.indent(mapping=2, sequence=4, offset=2)
+        yaml.dump(data, stream)
