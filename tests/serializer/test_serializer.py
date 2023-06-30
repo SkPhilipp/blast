@@ -17,7 +17,7 @@ def test_gate_encode_decode():
     def cycle(gate: list[int]):
         encoded = BitVectorSerializer.encode_gate(gate)
         bit_length = math.ceil(math.log2(len(gate)))
-        return BitVectorSerializer.decode_gate(encoded, bit_length)
+        return BitVectorDeserializer.decode_gate(encoded, bit_length)
 
     assert cycle([0, 0, 0, 0]) == [0, 0, 0, 0]
     assert cycle([0, 0, 0, 1]) == [0, 0, 0, 1]
