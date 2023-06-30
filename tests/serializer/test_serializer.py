@@ -1,5 +1,5 @@
 from blast.bitvector import BitVector
-from blast.serialize.serializer import BitVectorSerializer
+from blast.serialize.serializer import BitVectorSerializer, BitVectorDeserializer
 
 import math
 
@@ -31,11 +31,16 @@ def test_all(tmp_path_factory):
     bv0 = BitVector.mutable(8)
     bv0[0] = 1
     bv0[1] = 0
+    bv0[2] = bv0[1] & bv0[0]
     bv0[3] = bv0[2] | bv0[1]
     bv0[4] = bv0[3] & bv0[2]
-    bv0[5] = bv0[4] | bv0[3]
-    bv0[6] = bv0[5] & bv0[4]
-    bv0[7] = bv0[6] | bv0[5]
-    serializer0 = BitVectorSerializer(bv0)
+    bv0[5] = bv0[1] | bv0[0]
+    bv0[6] = bv0[2] & bv0[1]
+    bv0[7] = bv0[3] | bv0[2]
+
+    serializer = BitVectorSerializer()
+    deserializer = BitVectorDeserializer()
     temp_file = tmp_path_factory.mktemp("data").joinpath("sample.yaml")
-    serializer0.serialize(temp_file.open("w"))
+    serializer.serialize(bv0, temp_file.open("w"))
+    bv1 = deserializer.deserialize(temp_file.open("r"))
+    assert int(bv0) == int(bv1)
