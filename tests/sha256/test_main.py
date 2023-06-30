@@ -1,6 +1,4 @@
 from blast.bitvector import BitVector
-from blast.sha256.constants import MAGIC_FRACTIONS_BITVECTOR_SQUARE
-from blast.sha256.functions import round_big, init_words
 from blast.sha256.main import Sha256
 
 

@@ -1,5 +1,13 @@
 # blast
 
+Usage:
+
+```bash
+python -m blast dump_gamma0
+```
+
+## Development
+
 Requires:
 
 - Docker
