@@ -2,7 +2,7 @@ from blast.bitvector import BitVector
 from blast.sha256.constants import MAGIC_FRACTIONS_BITVECTOR_CUBE, SIZE_WORD
 
 
-def gamma0(x: BitVector):
+def gamma0(x: BitVector) -> BitVector:
     """
     Gamma 0 function as defined in the SHA256 standard.
     :param x:
@@ -11,11 +11,16 @@ def gamma0(x: BitVector):
     return x.rotate_right(7) ^ x.rotate_right(18) ^ (x >> 3)
 
 
-def gamma1(x: BitVector):
+def gamma1(x: BitVector) -> BitVector:
+    """
+    Gamma 1 function as defined in the SHA256 standard.
+    :param x:
+    :return:
+    """
     return x.rotate_right(17) ^ x.rotate_right(19) ^ (x >> 10)
 
 
-def word(position: int):
+def word(position: int) -> slice:
     """
     :param position:
     :return: A slice representing a 32-bit word from a bitvector representing a word array.
@@ -23,7 +28,7 @@ def word(position: int):
     return slice(position * SIZE_WORD, position * SIZE_WORD + SIZE_WORD)
 
 
-def init_words(data: BitVector):
+def init_words(data: BitVector) -> BitVector:
     """
     Builds the list of 64 32-bit words used in the SHA256 algorithm.
 
@@ -37,19 +42,35 @@ def init_words(data: BitVector):
     return w
 
 
-def sigma0(x: BitVector):
+def sigma0(x: BitVector) -> BitVector:
+    """
+    Sigma 0 function as defined in the SHA256 standard.
+    :param x:
+    :return:
+    """
     return x.rotate_right(2) ^ x.rotate_right(13) ^ x.rotate_right(22)
 
 
-def sigma1(x: BitVector):
+def sigma1(x: BitVector) -> BitVector:
+    """
+    Sigma 1 function as defined in the SHA256 standard.
+    :param x:
+    :return:
+    """
     return x.rotate_right(6) ^ x.rotate_right(11) ^ x.rotate_right(25)
 
 
 def choose(x: BitVector, y: BitVector, z: BitVector):
+    """
+    'Ch' function as defined in the SHA256 standard.
+    """
     return z ^ (x & (y ^ z))
 
 
 def majority(x: BitVector, y: BitVector, z: BitVector):
+    """
+    'Maj' function as defined in the SHA256 standard.
+    """
     return ((x | y) & z) | (x & y)
 
 
