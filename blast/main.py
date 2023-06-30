@@ -65,7 +65,7 @@ class SubcommandAnalysis(object):
             raise ValueError("A source must be provided")
         analysis = BitVectorAnalysis(self._source)
         analysis_individualized = analysis.individualize()
-        print(f"Individualized:")
+        print(f"individualized:")
         for analysis_bit in analysis_individualized:
             print(f"- {analysis_bit.compute()}")
 
