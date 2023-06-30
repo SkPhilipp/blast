@@ -3,9 +3,9 @@
 Usage:
 
 ```bash
- blast dump gamma0 \
+blast dump gamma0 \
     | blast dump bit 3 \
-    | blast analysis individualized
+    | blast analysis individualized`
 ```
 
 ## Development
