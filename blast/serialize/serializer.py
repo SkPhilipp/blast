@@ -36,11 +36,12 @@ class BitVectorSerializer(object):
         def collect(expression: Bit):
             dependency_ids = []
             for dependency in expression.dependencies():
-                if dependency not in expressions_seen:
-                    dependency_id = collect(dependency.value)
+                dependency_reference = Reference(dependency)
+                if dependency_reference not in expressions_seen:
+                    dependency_id = collect(dependency)
                     dependency_ids.append(dependency_id)
                 else:
-                    dependency_id = expressions_seen[dependency]
+                    dependency_id = expressions_seen[dependency_reference]
                     dependency_ids.append(dependency_id)
             expression_id = len(expressions_seen)
             expressions_seen[Reference(expression)] = expression_id

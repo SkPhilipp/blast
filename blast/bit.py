@@ -40,9 +40,9 @@ class Bit(object):
         """
         raise NotImplementedError()
 
-    def dependencies(self) -> set[Reference]:
+    def dependencies(self) -> list['Bit']:
         """
-        Returns a set of immediate Bit dependencies which must resolve to a value before this Bit can be resolved.
+        Returns a list of immediate Bit dependencies which must resolve to a value before this Bit can be resolved.
         """
         raise NotImplementedError()
 
@@ -195,10 +195,7 @@ class BitExpression(Bit):
         return inputs
 
     def dependencies(self):
-        dependencies = set()
-        for dependency in self._dependencies:
-            dependencies.add(Reference(dependency))
-        return dependencies
+        return list(self._dependencies)
 
     def is_concrete(self):
         for dependency in self._dependencies:
