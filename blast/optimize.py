@@ -7,7 +7,7 @@ class BitExpressionOptimization(object):
     """
 
     @staticmethod
-    def apply3(inputs: [Bit], computed: [int]) -> Bit | None:
+    def _apply3(inputs: [Bit], computed: [int]) -> Bit | None:
         """
         Apply this optimization to a 3-input expression.
         :param inputs: The inputs to the gate.
@@ -18,16 +18,16 @@ class BitExpressionOptimization(object):
             raise ValueError("Expected 3 inputs, got %d" % len(inputs))
         if len(computed) != 8:
             raise ValueError("Expected 8 outputs, got %d" % len(computed))
-        if computed[0:4] == computed[4:8]:
+        if computed[0] == computed[4] and computed[1] == computed[5] and computed[2] == computed[6] and computed[3] == computed[7]:
             return BitExpression(computed[0:4], inputs[0], inputs[1])
-        if computed[0:2] == computed[2:4] and computed[4:6] == computed[6:8]:
+        if computed[0] == computed[2] and computed[1] == computed[3] and computed[4] == computed[6] and computed[5] == computed[7]:
             return BitExpression(computed[0:2] + computed[4:6], inputs[0], inputs[2])
         if computed[0] == computed[1] and computed[2] == computed[3] and computed[4] == computed[5] and computed[6] == computed[7]:
             return BitExpression(computed[0:1] + computed[2:3] + computed[4:5] + computed[6:7], inputs[1], inputs[2])
         return None
 
     @staticmethod
-    def apply2(inputs: [Bit], computed: [int]) -> Bit | None:
+    def _apply2(inputs: [Bit], computed: [int]) -> Bit | None:
         """
         Apply this optimization to a 2-input expression.
         :param inputs: The inputs to the gate.
@@ -38,14 +38,14 @@ class BitExpressionOptimization(object):
             raise ValueError("Expected 2 inputs, got %d" % len(inputs))
         if len(computed) != 4:
             raise ValueError("Expected 4 outputs, got %d" % len(computed))
-        if computed[0:2] == computed[2:4]:
+        if computed[0] == computed[2] and computed[1] == computed[3]:
             return BitExpression(computed[0:2], inputs[0])
         if computed[0] == computed[1] and computed[2] == computed[3]:
             return BitExpression(computed[0:1] + computed[2:3], inputs[1])
         return None
 
     @staticmethod
-    def apply1(inputs: [Bit], computed: [int]) -> Bit | None:
+    def _apply1(inputs: [Bit], computed: [int]) -> Bit | None:
         """
         Apply this optimization to a 1-input expression.
         :param inputs: The inputs to the gate.
@@ -71,11 +71,11 @@ class BitExpressionOptimization(object):
         :return: An optimized expression, or None.
         """
         if len(inputs) == 3 and len(computed) == 8:
-            return BitExpressionOptimization.apply3(inputs, computed)
+            return BitExpressionOptimization._apply3(inputs, computed)
         if len(inputs) == 2 and len(computed) == 4:
-            return BitExpressionOptimization.apply2(inputs, computed)
+            return BitExpressionOptimization._apply2(inputs, computed)
         if len(inputs) == 1 and len(computed) == 2:
-            return BitExpressionOptimization.apply1(inputs, computed)
+            return BitExpressionOptimization._apply1(inputs, computed)
         return None
 
     @staticmethod
