@@ -12,9 +12,9 @@ def test_all():
     vector[1:2] = undetermined_2
     vector[2:3] = undetermined_3
     analysis = BitVectorAnalysis(vector)
-    assert analysis.inputs() == {Reference(undetermined_1), Reference(undetermined_2), Reference(undetermined_3)}
+    assert analysis.inputs() == sorted([Reference(undetermined_1), Reference(undetermined_2), Reference(undetermined_3)])
     individualized = analysis.individualize()
-    assert individualized[0].inputs() == {Reference(undetermined_1)}
-    assert individualized[1].inputs() == {Reference(undetermined_2)}
-    assert individualized[2].inputs() == {Reference(undetermined_3)}
-    assert individualized[3].inputs() == set()
+    assert individualized[0].inputs() == [Reference(undetermined_1)]
+    assert individualized[1].inputs() == [Reference(undetermined_2)]
+    assert individualized[2].inputs() == [Reference(undetermined_3)]
+    assert individualized[3].inputs() == list()

@@ -16,9 +16,9 @@ class BitVectorAnalysis(object):
             analyses.append(BitVectorAnalysis(self.bit_vector[i:i + 1]))
         return analyses
 
-    def inputs(self) -> set[Reference]:
+    def inputs(self) -> list[Reference]:
         """
-        Return the distinct non-concrete input bits required to resolve the bitvector.
+        Return the distinct non-concrete input bits required to resolve the bitvector, sorted by reference.
         :return:
         """
         inputs = set()
@@ -30,7 +30,7 @@ class BitVectorAnalysis(object):
                 if reference.value.is_concrete():
                     continue
                 inputs.add(reference)
-        return inputs
+        return sorted(inputs)
 
     def outputs(self) -> set[Reference]:
         """
