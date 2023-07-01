@@ -1,4 +1,3 @@
-from blast.analysis import BitVectorAnalysis
 from blast.bit import BitMutable, Reference
 from blast.optimize import BitExpressionOptimization
 
