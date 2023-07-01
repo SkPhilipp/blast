@@ -1,94 +1,65 @@
-from blast.bit import Bit, BitExpression, BIT_0, BIT_1
+from blast.bit import Bit, BitExpression, BIT_0
+from blast.analysis import BitVectorAnalysis
 
 
 class BitExpressionOptimization(object):
-    """
-    Base class for optimizations of BitExpressions.
-    """
-
     @staticmethod
-    def _apply3(inputs: [Bit], computed: [int]) -> Bit | None:
+    def _fix_inputs(inputs: [Bit], gate: [int]) -> Bit | None:
         """
-        Apply this optimization to a 3-input expression.
-        :param inputs: The inputs to the gate.
-        :param computed: The computed outputs of the expression.
+        Returns an optimized expression, or None if no optimization is possible.
+        This method determines for a given gate whether the given inputs' values have any effect on the gate's outputs.
+
+        For example;
+        - For a gate of [0, 0, 0, 0] the inputs have no effect on the outputs; it always maps to 0.
+        - For a gate of [0, 1, 0, 1] the highest bit input has no effect on the outputs; it always maps to [0, 1].
+
+        The optimized expression is formed by replacing the inputs which have no effect on the outputs with a constant bit.
+
+        :param inputs: The inputs bits to the expression which formed the outputs.
+        :param gate: The computed outputs for each possible input permutation.
         :return: An optimized expression, or None.
         """
-        if len(inputs) != 3:
-            raise ValueError("Expected 3 inputs, got %d" % len(inputs))
-        if len(computed) != 8:
-            raise ValueError("Expected 8 outputs, got %d" % len(computed))
-        if computed[0] == computed[4] and computed[1] == computed[5] and computed[2] == computed[6] and computed[3] == computed[7]:
-            return BitExpression(computed[0:4], inputs[0], inputs[1])
-        if computed[0] == computed[2] and computed[1] == computed[3] and computed[4] == computed[6] and computed[5] == computed[7]:
-            return BitExpression(computed[0:2] + computed[4:6], inputs[0], inputs[2])
-        if computed[0] == computed[1] and computed[2] == computed[3] and computed[4] == computed[5] and computed[6] == computed[7]:
-            return BitExpression(computed[0:1] + computed[2:3] + computed[4:5] + computed[6:7], inputs[1], inputs[2])
-        return None
+        if 2 ** len(inputs) != len(gate):
+            raise ValueError(f"Can't apply this optimization to {len(inputs)} inputs for a gate size of {len(gate)}.")
+
+        inputs_new = list(inputs)
+        inputs_modified = False
+        sections = 1
+        for input_index in reversed(range(len(inputs))):
+            # check if all sections' left halves equal their right halves
+            section_length = len(gate) // sections
+            section_length_half = section_length // 2
+            section_halves_match = True
+            for i in range(sections):
+                section_offset = i * section_length
+                section_offset_half_right = section_offset + section_length_half
+                for j in range(section_length_half):
+                    if gate[section_offset + j] != gate[section_offset_half_right + j]:
+                        section_halves_match = False
+                        break
+                if not section_halves_match:
+                    break
+            # when halves match, the input has no effect on outputs
+            if section_halves_match:
+                inputs_modified = True
+                inputs_new[input_index] = BIT_0
+            # otherwise, split up sections into halves and try the next input
+            sections *= 2
+        if inputs_modified:
+            return BitExpression(gate, *inputs_new)
+        else:
+            return None
 
     @staticmethod
-    def _apply2(inputs: [Bit], computed: [int]) -> Bit | None:
+    def fix_inputs(bit: Bit) -> Bit | None:
         """
-        Apply this optimization to a 2-input expression.
-        :param inputs: The inputs to the gate.
-        :param computed: The computed outputs of the expression.
-        :return: An optimized expression, or None.
-        """
-        if len(inputs) != 2:
-            raise ValueError("Expected 2 inputs, got %d" % len(inputs))
-        if len(computed) != 4:
-            raise ValueError("Expected 4 outputs, got %d" % len(computed))
-        if computed[0] == computed[2] and computed[1] == computed[3]:
-            return BitExpression(computed[0:2], inputs[0])
-        if computed[0] == computed[1] and computed[2] == computed[3]:
-            return BitExpression(computed[0:1] + computed[2:3], inputs[1])
-        return None
+        Performs analysis on the given bit to determine its effective gate and inputs, then optimizes away any inputs which have no effect on the outputs.
 
-    @staticmethod
-    def _apply1(inputs: [Bit], computed: [int]) -> Bit | None:
+        :param bit: The bit to optimize.
+        :return: An optimized bit, or None.
         """
-        Apply this optimization to a 1-input expression.
-        :param inputs: The inputs to the gate.
-        :param computed: The computed outputs of the expression.
-        :return: A constant bit, or None.
-        """
-        if len(inputs) != 1:
-            raise ValueError("Expected 1 input, got %d" % len(inputs))
-        if len(computed) != 2:
-            raise ValueError("Expected 2 outputs, got %d" % len(computed))
-        if computed[0] == 0 and computed[1] == 0:
-            return BIT_0
-        if computed[0] == 1 and computed[1] == 1:
-            return BIT_1
-        return None
-
-    @staticmethod
-    def _optimize(inputs: [Bit], computed: [int]) -> Bit | None:
-        """
-        Apply this optimization to an expression.
-        :param inputs: The inputs to the gate.
-        :param computed: The computed outputs of the expression.
-        :return: An optimized expression, or None.
-        """
-        if len(inputs) == 3 and len(computed) == 8:
-            return BitExpressionOptimization._apply3(inputs, computed)
-        if len(inputs) == 2 and len(computed) == 4:
-            return BitExpressionOptimization._apply2(inputs, computed)
-        if len(inputs) == 1 and len(computed) == 2:
-            return BitExpressionOptimization._apply1(inputs, computed)
-        return None
-
-    @staticmethod
-    def optimize(bit: Bit) -> Bit:
-        """
-        Apply optimizations repeatedly to an expression until no further optimizations are possible.
-        :param bit: The expression to optimize.
-        :return: An optimized expression, or None.
-        """
-        best_optimized = bit
-        while isinstance(best_optimized, BitExpression):
-            optimized = BitExpressionOptimization._optimize(best_optimized.dependencies(), best_optimized.gate)
-            if optimized is None:
-                break
-            best_optimized = optimized
-        return best_optimized
+        analysis = BitVectorAnalysis.for_bit(bit)
+        gate_input_references = analysis.inputs()
+        gate_inputs = [reference.value for reference in gate_input_references]
+        gate = analysis.compute()
+        return BitExpressionOptimization._fix_inputs(gate_inputs, gate)

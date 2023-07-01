@@ -6,6 +6,15 @@ class BitVectorAnalysis(object):
     def __init__(self, bit_vector: BitVector):
         self.bit_vector: BitVector = bit_vector
 
+    @staticmethod
+    def for_bit(bit: Bit):
+        """
+        Create a BitVectorAnalysis for one bit.
+        :param bit:
+        :return:
+        """
+        return BitVectorAnalysis(BitVector([bit]))
+
     def individualize(self) -> ['BitVectorAnalysis']:
         """
         Create a BitVectorAnalysis for each bit in the underlying bitvector.
